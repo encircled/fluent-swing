@@ -5,7 +5,6 @@ import cz.encircled.fswing.components.FluentPanel
 import cz.encircled.fswing.components.table.FluentTable
 import cz.encircled.fswing.model.GridData
 import cz.encircled.fswing.observable.observableList
-import javafx.collections.FXCollections.observableArrayList
 import java.awt.BorderLayout
 import java.awt.Color
 import javax.swing.JFrame
@@ -37,7 +36,7 @@ class Showcase : JFrame() {
     }
 
     private fun tableTab(): FluentPanel {
-        val dynEnum = observableArrayList(DynamicEnum("D1"), DynamicEnum("D2"))
+        val dynEnum = observableList(DynamicEnum("D1"), DynamicEnum("D2"))
 
         return gridPanel {
             nextRow {

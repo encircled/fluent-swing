@@ -10,6 +10,10 @@ open class DelegatingObservableList<T>(initial: Collection<T> = listOf()) : Obse
 
     protected val delegate: ObservableList<T> = FXCollections.observableArrayList(initial)
 
+    override fun setAll(vararg elements: T) = delegate.setAll(*elements)
+
+    override fun setAll(elements: Collection<T>) = delegate.setAll(elements)
+
     override val size: Int
         get() = delegate.size
 
@@ -72,5 +76,11 @@ open class DelegatingObservableList<T>(initial: Collection<T> = listOf()) : Obse
     override fun set(index: Int, element: T): T = delegate.set(index, element)
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<T> = delegate.subList(fromIndex, toIndex)
+
+    override fun equals(other: Any?): Boolean = delegate == other
+
+    override fun hashCode(): Int = delegate.hashCode()
+
+    override fun toString(): String = delegate.toString()
 
 }

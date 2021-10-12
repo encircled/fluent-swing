@@ -3,10 +3,6 @@ package cz.encircled.fswing
 import cz.encircled.fswing.components.Cancelable
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
-import javafx.collections.ListChangeListener
-import javafx.collections.ObservableList
-import javafx.collections.ObservableSet
-import javafx.collections.SetChangeListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.util.concurrent.CompletableFuture
@@ -70,47 +66,10 @@ inline fun Document.onChange(crossinline callback: (String) -> Unit) {
     })
 }
 
-inline fun <T> ObservableValue<T>.addNewValueListener(crossinline listener: (T) -> Unit): Cancelable {
-    // TODO move to Removable?
+inline fun <T> ObservableValue<T>.onChange(crossinline listener: (T) -> Unit): Cancelable {
     val listenerToAdd: ChangeListener<T> = ChangeListener { _: ObservableValue<out T>, _: T, newValue: T ->
         inUiThread {
             listener.invoke(newValue)
-        }
-    }
-    addListener(listenerToAdd)
-    return Cancelable {
-        removeListener(listenerToAdd)
-    }
-}
-
-inline fun <T> ObservableList<T>.onChange(crossinline listener: (added: List<T>, removed: List<T>) -> Unit): Cancelable {
-    val listenerToAdd = ListChangeListener<T> {
-        val added = ArrayList<T>()
-        val removed = ArrayList<T>()
-
-        while (it.next()) {
-            added.addAll(it.addedSubList)
-            removed.addAll(it.removed)
-        }
-
-        inUiThread {
-            listener.invoke(added, removed)
-        }
-    }
-    addListener(listenerToAdd)
-    return Cancelable {
-        removeListener(listenerToAdd)
-    }
-}
-
-inline fun <T> ObservableSet<T>.onChange(crossinline listener: (item: T, isAdded: Boolean) -> Unit): Cancelable {
-    val listenerToAdd = SetChangeListener<T> {
-        inUiThread {
-            if (it.wasAdded()) {
-                listener(it.elementAdded, true)
-            } else {
-                listener(it.elementRemoved, false)
-            }
         }
     }
     addListener(listenerToAdd)

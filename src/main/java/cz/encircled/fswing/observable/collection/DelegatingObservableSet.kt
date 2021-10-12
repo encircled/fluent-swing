@@ -4,7 +4,7 @@ package cz.encircled.fswing.observable.collection
  * Observable version of Set-like collection
  */
 open class DelegatingObservableSet<T>(initial: Set<T> = setOf()) : DelegatingObservableList<T>(initial),
-    ObservableCollection<T> {
+    ObservableSet<T> {
 
     override fun add(element: T): Boolean {
         val contains = contains(element)
@@ -38,6 +38,14 @@ open class DelegatingObservableSet<T>(initial: Set<T> = setOf()) : DelegatingObs
             }
         }
         return added
+    }
+
+    override fun setAll(vararg elements: T): Boolean {
+        return super.setAll(elements.toSet())
+    }
+
+    override fun setAll(elements: Collection<T>): Boolean {
+        return super.setAll(elements.toSet())
     }
 
 }

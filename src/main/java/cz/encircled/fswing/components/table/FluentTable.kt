@@ -6,7 +6,7 @@ import cz.encircled.fswing.components.RemovalAware
 import cz.encircled.fswing.observable.collection.ObservableCollection
 import cz.encircled.fswing.onClick
 import cz.encircled.fswing.settings.FluentSwingSettings.ln
-import javafx.collections.ObservableList
+import java.awt.Component
 import javax.swing.*
 import javax.swing.table.DefaultTableModel
 import kotlin.reflect.KClass
@@ -22,13 +22,16 @@ class FluentTable<T : Any>(
     private val model: ObservableModel<T> = ObservableModel(clazz, data)
 ) : JTable(model), RemovalAware {
 
-    private val columnToDynamicEnum: MutableMap<String, ObservableList<*>> = mutableMapOf()
+    private val columnToDynamicEnum: MutableMap<String, ObservableCollection<*>> = mutableMapOf()
     override val cancelableListeners: MutableList<Cancelable> = arrayListOf()
 
     init {
         putClientProperty("terminateEditOnFocusLost", true)
 
-        setEditors()
+        setCellEditors()
+
+        showHorizontalLines = true
+        autoCreateRowSorter = true
 
         componentPopupMenu = JPopupMenu()
         tableHeader.componentPopupMenu = componentPopupMenu
@@ -37,15 +40,29 @@ class FluentTable<T : Any>(
         })
     }
 
-    private fun setEditors() {
-        model.indexToProp.forEach { (index, prop) ->
-            columnModel.getColumn(index).cellEditor = buildEditor(prop)
-        }
+    fun readOnly(): FluentTable<T> {
+        model.isReadOnly = true
+        return this
     }
 
-    fun dynamicEnumColumn(column: String, list: ObservableList<*>): FluentTable<T> {
+    fun noHorizontalLines(): FluentTable<T> {
+        setShowHorizontalLines(false)
+        return this
+    }
+
+    fun verticalLines(): FluentTable<T> {
+        setShowVerticalLines(true)
+        return this
+    }
+
+    fun cellSelectable(): FluentTable<T> {
+        columnSelectionAllowed = true
+        return this
+    }
+
+    fun dynamicEnumColumn(column: String, list: ObservableCollection<*>): FluentTable<T> {
         columnToDynamicEnum[column] = list
-        setEditors()
+        setCellEditors()
         return this
     }
 
@@ -55,6 +72,8 @@ class FluentTable<T : Any>(
     fun withAddItemPopup(newItem: () -> T): FluentTable<T> {
         componentPopupMenu.add(JMenuItem(ln["Add"]).onClick {
             model.data.add(newItem())
+            val i = rowSorter.convertRowIndexToView(model.data.size - 1)
+            selectionModel.setSelectionInterval(i, i)
         })
         return this
     }
@@ -69,9 +88,29 @@ class FluentTable<T : Any>(
         return this
     }
 
-    private fun buildEditor(prop: KProperty1<*, Any?>): DefaultCellEditor {
+    private fun setCellEditors() {
+        model.indexToProp.forEach { (index, prop) ->
+            columnModel.getColumn(index).cellEditor = getCellEditorForColumn(prop)
+        }
+    }
+
+    private fun getCellEditorForColumn(prop: KProperty1<*, Any?>): DefaultCellEditor {
         if (columnToDynamicEnum.containsKey(prop.name)) {
-            return DefaultCellEditor(FluentComboBox(columnToDynamicEnum.getValue(prop.name)))
+            val comboBox = FluentComboBox(columnToDynamicEnum.getValue(prop.name))
+            return object : DefaultCellEditor(comboBox) {
+                override fun getTableCellEditorComponent(
+                    table: JTable?,
+                    value: Any?,
+                    isSelected: Boolean,
+                    row: Int,
+                    column: Int
+                ): Component {
+                    // Preserve currently set value
+                    val fluentComboBox = editorComponent as FluentComboBox<Any>
+                    fluentComboBox.selectedIndex = fluentComboBox.data.indexOf(value!!)
+                    return super.getTableCellEditorComponent(table, value, isSelected, row, column)
+                }
+            }
         }
 
         val clazz = prop.javaField!!.type
@@ -92,6 +131,8 @@ class FluentTable<T : Any>(
 
     class ObservableModel<T : Any>(clazz: KClass<T>, val data: ObservableCollection<T>) : DefaultTableModel() {
 
+        var isReadOnly = false
+
         val indexToProp: Map<Int, KProperty1<T, Any?>> = clazz.memberProperties.reversed()
             .mapIndexed { index: Int, p: KProperty1<T, *> -> Pair(index, p) }
             .associateBy({ it.first }, { it.second })
@@ -100,6 +141,10 @@ class FluentTable<T : Any>(
             indexToProp.keys.forEach {
                 addColumn(indexToProp.getValue(it).name)
             }
+        }
+
+        override fun isCellEditable(row: Int, column: Int): Boolean {
+            return !isReadOnly && super.isCellEditable(row, column)
         }
 
         override fun getColumnClass(columnIndex: Int): Class<*> {

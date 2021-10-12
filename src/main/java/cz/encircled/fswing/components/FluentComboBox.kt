@@ -1,21 +1,20 @@
 package cz.encircled.fswing.components
 
-import cz.encircled.fswing.onChange
+import cz.encircled.fswing.observable.collection.ObservableCollection
+import cz.encircled.fswing.observable.observableList
 import cz.encircled.fswing.settings.FluentSwingSettings
 import javafx.beans.property.ObjectProperty
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComboBox
 
 class FluentComboBox<T>(values: List<T> = listOf()) : JComboBox<FluentComboBox.LocalizedObject<T>>(),
     RemovalAware {
 
-    private val data: ObservableList<T>
+    val data: ObservableCollection<T>
     override val cancelableListeners: MutableList<Cancelable> = arrayListOf()
 
     init {
-        if (values is ObservableList<T>) {
+        if (values is ObservableCollection<T>) {
             this.data = values
             this.data.onChange { _, _ ->
                 onDataChange()
@@ -23,7 +22,7 @@ class FluentComboBox<T>(values: List<T> = listOf()) : JComboBox<FluentComboBox.L
             onDataChange()
         } else {
             model = DefaultComboBoxModel(values.map { LocalizedObject(it) }.toTypedArray())
-            data = FXCollections.observableArrayList()
+            data = observableList()
         }
     }
 
