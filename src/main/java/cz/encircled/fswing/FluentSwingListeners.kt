@@ -56,14 +56,20 @@ inline fun JSlider.onChange(crossinline callback: (Int, Boolean) -> Unit) {
     }
 }
 
-inline fun Document.onChange(crossinline callback: (String) -> Unit) {
-    addDocumentListener(object : DocumentListener {
+inline fun Document.onChange(crossinline callback: (String) -> Unit): Cancelable {
+    val listener = object : DocumentListener {
         override fun insertUpdate(e: DocumentEvent) = callback.invoke(e.document.getText(0, e.document.length))
 
         override fun removeUpdate(e: DocumentEvent) = callback.invoke(e.document.getText(0, e.document.length))
 
         override fun changedUpdate(e: DocumentEvent) = callback.invoke(e.document.getText(0, e.document.length))
-    })
+    }
+
+    addDocumentListener(listener)
+
+    return Cancelable {
+        removeDocumentListener(listener)
+    }
 }
 
 inline fun <T> ObservableValue<T>.onChange(crossinline listener: (T) -> Unit): Cancelable {

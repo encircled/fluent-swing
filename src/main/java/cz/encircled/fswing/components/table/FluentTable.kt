@@ -33,6 +33,17 @@ class FluentTable<T : Any>(
         showHorizontalLines = true
         autoCreateRowSorter = true
 
+        onClick {
+            val row = rowAtPoint(it.point)
+            if (row > -1) {
+                setRowSelectionInterval(row, row)
+                if (columnSelectionAllowed) {
+                    val column = columnAtPoint(it.point)
+                    if (column > -1) setColumnSelectionInterval(column, column)
+                }
+            }
+        }
+
         componentPopupMenu = JPopupMenu()
         tableHeader.componentPopupMenu = componentPopupMenu
         cancelableListeners.add(data.onChange { _, _ ->
@@ -58,6 +69,19 @@ class FluentTable<T : Any>(
     fun cellSelectable(): FluentTable<T> {
         columnSelectionAllowed = true
         return this
+    }
+
+    fun selectedColumnName(): String {
+        val c = selectedColumn
+        return if (c == -1) "" else columnModel.getColumn(c).headerValue.toString()
+    }
+
+    fun selectedItem(): T? {
+        val row = selectedRow
+        return if (row > -1) {
+            val realRow = rowSorter.convertRowIndexToModel(row)
+            model.data[realRow]
+        } else null
     }
 
     fun dynamicEnumColumn(column: String, list: ObservableCollection<*>): FluentTable<T> {

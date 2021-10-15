@@ -10,6 +10,9 @@ import javax.swing.JComboBox
 class FluentComboBox<T>(values: List<T> = listOf()) : JComboBox<FluentComboBox.LocalizedObject<T>>(),
     RemovalAware {
 
+    val selected: T
+        get() = (selectedItem as LocalizedObject<T>).item
+
     val data: ObservableCollection<T>
     override val cancelableListeners: MutableList<Cancelable> = arrayListOf()
 
@@ -26,16 +29,25 @@ class FluentComboBox<T>(values: List<T> = listOf()) : JComboBox<FluentComboBox.L
         }
     }
 
+    fun onChange(callback: (T) -> Unit): FluentComboBox<T> {
+        addActionListener {
+            callback(selected)
+        }
+        return this
+    }
+
+    // TODO BiDirectional?
     fun bind(prop: ObjectProperty<T>): FluentComboBox<T> {
         addItemListener {
-            prop.value = (it.item as LocalizedObject<T>).item
+            prop.value = selected
         }
         return this
     }
 
     private fun onDataChange() {
-        model = DefaultComboBoxModel(data
-            .map { LocalizedObject(it) }
+        model = DefaultComboBoxModel(
+            data
+                .map { LocalizedObject(it) }
             .sortedBy { it.toString() }
             .toTypedArray()
         )

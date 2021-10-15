@@ -8,4 +8,7 @@ interface ObservableCollection<T> : MutableList<T> {
 
     fun setAll(elements: Collection<T>): Boolean
     fun setAll(vararg elements: T): Boolean
+
+    fun bindIncoming(other: ObservableCollection<T>)
+
 }

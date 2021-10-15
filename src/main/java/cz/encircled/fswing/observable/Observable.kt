@@ -11,4 +11,6 @@ fun <T> observableSet(vararg items: T): ObservableSet<T> = DelegatingObservableS
 
 fun <T> observableList(): ObservableCollection<T> = DelegatingObservableList()
 
-fun <T> observableList(vararg items: T): ObservableCollection<T> = DelegatingObservableList(items.toSet())
+fun <T> observableList(vararg items: T): ObservableCollection<T> = DelegatingObservableList(items.toList())
+
+fun <T> observableList(items: List<T>): ObservableCollection<T> = DelegatingObservableList(items)

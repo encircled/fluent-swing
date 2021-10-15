@@ -1,7 +1,12 @@
 package cz.encircled.fswing
 
 import com.formdev.flatlaf.FlatDarculaLaf
+import cz.encircled.fswing.components.FluentInput
+import cz.encircled.fswing.components.FluentNumberInput
 import cz.encircled.fswing.components.FluentPanel
+import cz.encircled.fswing.components.FluentToggleButton
+import cz.encircled.fswing.components.modal.OptionPane.getUserConfirmation
+import cz.encircled.fswing.components.modal.OptionPane.getUserInput
 import cz.encircled.fswing.components.table.FluentTable
 import cz.encircled.fswing.model.GridData
 import cz.encircled.fswing.observable.observableList
@@ -33,6 +38,37 @@ class Showcase : JFrame() {
 
         tabs.addTab("Table", tableTab())
         tabs.addTab("Layout", layoutTab())
+        tabs.addTab("Inputs", inputsTab())
+    }
+
+    private fun inputsTab(): FluentPanel {
+        return gridPanel {
+            nextColumn(height = 40) {
+                FluentInput("Placeholder...").onChange {
+                    println("FluentInput onChange triggered with [$it] value")
+                }
+            }
+            nextColumn(height = 40) {
+                FluentNumberInput("Some numbers please").onChange {
+                    println("FluentNumberInput onChange triggered with [$it] value")
+                }
+            }
+
+            nextRow(height = 40) {
+                FluentToggleButton("Get user input").onClick {
+                    getUserInput("Input, please", "initial value") {
+                        println(it)
+                    }
+                }
+            }
+            nextRow(height = 40) {
+                FluentToggleButton("Confirm, please?").onClick {
+                    getUserConfirmation("Yes?") {
+                        println("It is confirmed!")
+                    }
+                }
+            }
+        }
     }
 
     private fun tableTab(): FluentPanel {
@@ -40,19 +76,23 @@ class Showcase : JFrame() {
 
         return gridPanel {
             nextRow {
-                JScrollPane(
-                    FluentTable(
-                        TestEntity::class,
-                        observableList(
-                            TestEntity("name1", 2, SomeEnum.Pizza, dynEnum[0], true),
-                            TestEntity("name2", 4, SomeEnum.Burger, dynEnum[1], false),
-                        )
+                val table = FluentTable(
+                    TestEntity::class,
+                    observableList(
+                        TestEntity("name1", 2, SomeEnum.Pizza, dynEnum[0], true),
+                        TestEntity("name2", 4, SomeEnum.Burger, dynEnum[1], false),
                     )
+                )
+                JScrollPane(
+                    table
                         .dynamicEnumColumn("dynamic", dynEnum)
                         .withAddItemPopup {
                             TestEntity("", 0, SomeEnum.Noodles, dynEnum[0], true)
                         }
                         .withDeleteItemPopup()
+                        .onClick {
+                            println(table.selectedColumnName())
+                        }
                 )
             }
         }

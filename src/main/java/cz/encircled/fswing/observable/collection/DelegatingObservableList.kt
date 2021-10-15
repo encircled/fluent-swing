@@ -43,6 +43,14 @@ open class DelegatingObservableList<T>(initial: Collection<T> = listOf()) : Obse
         }
     }
 
+    override fun bindIncoming(other: ObservableCollection<T>) {
+        other.onChange { added, removed ->
+            addAll(added)
+            removeAll(removed)
+        }
+        addAll(other)
+    }
+
     override fun get(index: Int): T = delegate.get(index)
 
     override fun indexOf(element: T): Int = delegate.indexOf(element)
