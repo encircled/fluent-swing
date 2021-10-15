@@ -1,10 +1,9 @@
 package cz.encircled.fswing
 
 import com.formdev.flatlaf.FlatDarculaLaf
-import cz.encircled.fswing.components.FluentInput
-import cz.encircled.fswing.components.FluentNumberInput
-import cz.encircled.fswing.components.FluentPanel
-import cz.encircled.fswing.components.FluentToggleButton
+import cz.encircled.fswing.components.*
+import cz.encircled.fswing.components.chart.FluentLineChart
+import cz.encircled.fswing.components.chart.FluentPieChart
 import cz.encircled.fswing.components.modal.OptionPane.getUserConfirmation
 import cz.encircled.fswing.components.modal.OptionPane.getUserInput
 import cz.encircled.fswing.components.table.FluentTable
@@ -12,6 +11,7 @@ import cz.encircled.fswing.model.GridData
 import cz.encircled.fswing.observable.observableList
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Component
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.JScrollPane
@@ -33,12 +33,59 @@ class Showcase : JFrame() {
         size = 1024 x 768
 
         layout = BorderLayout()
-        val tabs = JTabbedPane()
-        add(tabs, BorderLayout.CENTER)
 
-        tabs.addTab("Table", tableTab())
-        tabs.addTab("Layout", layoutTab())
-        tabs.addTab("Inputs", inputsTab())
+        add(
+            gridPanel {
+                nextRow {
+                    val tabs = JTabbedPane()
+                    tabs.addTab("Table", tableTab())
+                    tabs.addTab("Layout", layoutTab())
+                    tabs.addTab("Inputs", inputsTab())
+                    tabs.addTab("Charts", chartsTab())
+                    tabs
+                }
+            },
+            BorderLayout.CENTER
+        )
+    }
+
+    private fun chartsTab(): Component {
+        val source = observableList(
+            TestEntity("E1", 3, SomeEnum.Pasta, DynamicEnum("D1")),
+            TestEntity("E2", 2, SomeEnum.Pasta, DynamicEnum("D2")),
+            TestEntity("E3", 2, SomeEnum.Pasta, DynamicEnum("D3")),
+
+            TestEntity("E4", 4, SomeEnum.Burger, DynamicEnum("D2")),
+            TestEntity("E5", 5, SomeEnum.Burger, DynamicEnum("D3")),
+        )
+
+        return gridPanel {
+            nextRow(height = 30) {
+                FluentLabel("Pie Chart")
+            }
+            nextRow(height = 300) {
+                FluentPieChart(observableList(
+                    TestEntity("E1", count = 3),
+                    TestEntity("E3", food = SomeEnum.Pasta),
+                ), { it.food.name }, { it.count })
+            }
+
+            nextRow(height = 30) {
+                FluentLabel("Line Chart")
+            }
+            nextRow(height = 300) {
+                FluentLineChart(
+                    source,
+                    { it.food.name },
+                    { it.dynamic.name },
+                    { it.count },
+
+                    "Food",
+                    "Count",
+                    "Line Chart"
+                )
+            }
+        }
     }
 
     private fun inputsTab(): FluentPanel {
@@ -46,6 +93,8 @@ class Showcase : JFrame() {
             nextColumn(height = 40) {
                 FluentInput("Placeholder...").onChange {
                     println("FluentInput onChange triggered with [$it] value")
+                }.onChange {
+                    println("FluentInput onChange2 triggered with [$it] value")
                 }
             }
             nextColumn(height = 40) {
@@ -119,11 +168,11 @@ class Showcase : JFrame() {
     }
 
     data class TestEntity(
-        var name: String,
-        var count: Int,
-        var food: SomeEnum,
-        var dynamic: DynamicEnum,
-        var boolean: Boolean,
+        var name: String = "TestEntity1",
+        var count: Int = 1,
+        var food: SomeEnum = SomeEnum.Burger,
+        var dynamic: DynamicEnum = DynamicEnum("D1"),
+        var boolean: Boolean = true,
     )
 
     data class DynamicEnum(
