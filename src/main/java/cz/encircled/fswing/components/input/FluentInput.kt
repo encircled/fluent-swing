@@ -1,5 +1,6 @@
-package cz.encircled.fswing.components
+package cz.encircled.fswing.components.input
 
+import cz.encircled.fswing.components.Cancelable
 import javafx.beans.property.StringProperty
 
 open class FluentInput(

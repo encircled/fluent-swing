@@ -28,7 +28,7 @@ open class FluentMenu<T>(text: String, val items: List<T>, var callback: (T) -> 
 
     fun addMenuItems() {
         removeAll()
-        items.forEach { item ->
+        items.sortedBy { ln[it.toString()] }.forEach { item ->
             add(JMenuItem(ln[item.toString()]).onClick {
                 callback(item)
             })

@@ -39,24 +39,34 @@ open class FluentPieChart<S>(
 
     private fun applyDataToChart() {
         val dataset = DefaultPieDataset<String>()
-        val min = minimalThreshold.get()
 
-        source
-            .filter { valueMapper(it).toLong() >= min }
+        val filtered = filtered()
+        filtered.first
             .forEachIndexed { index, item ->
                 dataset.insertValue(index, keyMapper(item), valueMapper(item))
             }
 
-        if (dataset.keys.size < source.size) {
-            dataset.insertValue(dataset.keys.size, FluentSwingSettings.ln["Other"], source
-                .map { valueMapper(it).toLong() }
-                .filter { it < min }
-                .sum())
+        if (filtered.second.isNotEmpty()) {
+            val keys = filtered.second.map(keyMapper).toSet().take(10).joinToString(", ")
+            dataset.insertValue(dataset.keys.size, FluentSwingSettings.ln["Other"] + " ($keys)",
+                filtered.second.sumOf { valueMapper(it).toDouble() })
         }
 
         val chart = ChartFactory.createPieChart("", dataset)
         chart.setTextAntiAlias(true)
         chartPanel.chart = chart
+    }
+
+    private fun filtered(): Pair<List<S>, List<S>> {
+        val withFilter = source.groupBy { valueMapper(it).toDouble() >= minimalThreshold.get() }.toMutableMap()
+        val passed = withFilter[true]?.sortedByDescending { valueMapper(it).toDouble() } ?: listOf()
+        val skipped = withFilter[false] ?: listOf()
+
+        return if (passed.size > 21) {
+            (passed.subList(0, 20)) to (passed.subList(20, passed.size) + skipped)
+        } else {
+            passed to skipped
+        }
     }
 
 }

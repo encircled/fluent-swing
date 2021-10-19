@@ -1,5 +1,7 @@
-package cz.encircled.fswing.components
+package cz.encircled.fswing.components.input
 
+import cz.encircled.fswing.components.Cancelable
+import cz.encircled.fswing.components.RemovalAware
 import cz.encircled.fswing.onChange
 import cz.encircled.fswing.settings.FluentSwingSettings
 import cz.encircled.fswing.time.Scheduled
@@ -25,7 +27,7 @@ abstract class BaseInput<T>(
         }
     }
 
-    fun onChange(callback: (T?) -> Unit): BaseInput<T> {
+    open fun onChange(callback: (T) -> Unit): BaseInput<T> {
         val index = callbackIndex++
         cancelableListeners.add(document.onChange {
             onChangeSchedule[index]?.cancel()
@@ -36,6 +38,6 @@ abstract class BaseInput<T>(
         return this
     }
 
-    protected abstract fun mapValue(value: String): T?
+    protected abstract fun mapValue(value: String): T
 
 }

@@ -1,14 +1,19 @@
 package cz.encircled.fswing
 
 import com.formdev.flatlaf.FlatDarculaLaf
-import cz.encircled.fswing.components.*
+import cz.encircled.fswing.components.FluentLabel
+import cz.encircled.fswing.components.FluentPanel
+import cz.encircled.fswing.components.FluentToggleButton
 import cz.encircled.fswing.components.chart.FluentLineChart
 import cz.encircled.fswing.components.chart.FluentPieChart
+import cz.encircled.fswing.components.input.FluentInput
+import cz.encircled.fswing.components.input.FluentNumberInput
 import cz.encircled.fswing.components.modal.OptionPane.getUserConfirmation
 import cz.encircled.fswing.components.modal.OptionPane.getUserInput
 import cz.encircled.fswing.components.table.FluentTable
 import cz.encircled.fswing.model.GridData
 import cz.encircled.fswing.observable.observableList
+import org.jfree.data.time.Year
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Component
@@ -51,12 +56,12 @@ class Showcase : JFrame() {
 
     private fun chartsTab(): Component {
         val source = observableList(
-            TestEntity("E1", 3, SomeEnum.Pasta, DynamicEnum("D1")),
-            TestEntity("E2", 2, SomeEnum.Pasta, DynamicEnum("D2")),
-            TestEntity("E3", 2, SomeEnum.Pasta, DynamicEnum("D3")),
+            TestEntity("E1", 3, SomeEnum.Pasta, DynamicEnum("2010")),
+            TestEntity("E2", 2, SomeEnum.Pasta, DynamicEnum("2012")),
+            TestEntity("E3", 2, SomeEnum.Pasta, DynamicEnum("2014")),
 
-            TestEntity("E4", 4, SomeEnum.Burger, DynamicEnum("D2")),
-            TestEntity("E5", 5, SomeEnum.Burger, DynamicEnum("D3")),
+            TestEntity("E4", 4, SomeEnum.Burger, DynamicEnum("2012")),
+            TestEntity("E5", 5, SomeEnum.Burger, DynamicEnum("2014")),
         )
 
         return gridPanel {
@@ -77,7 +82,7 @@ class Showcase : JFrame() {
                 FluentLineChart(
                     source,
                     { it.food.name },
-                    { it.dynamic.name },
+                    { Year(it.dynamic.name.toInt()) },
                     { it.count },
 
                     "Food",
