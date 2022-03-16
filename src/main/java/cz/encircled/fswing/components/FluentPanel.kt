@@ -95,8 +95,8 @@ open class FluentPanel(
         }
         if (data.width != null) {
             constraints.weightx = 0.0
-            component.minimumSize = width x component.minimumSize.height
-            component.preferredSize = width x component.preferredSize.height
+            component.minimumSize = data.width x component.minimumSize.height
+            component.preferredSize = data.width x component.preferredSize.height
         }
     }
 

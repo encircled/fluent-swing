@@ -17,6 +17,7 @@ import org.jfree.data.time.RegularTimePeriod
 import org.jfree.data.time.TimeSeries
 import org.jfree.data.time.TimeSeriesCollection
 import org.jfree.data.time.Year
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -69,20 +70,26 @@ open class FluentLineChart<S>(
         chart.setTextAntiAlias(true)
 
         val r = (plot.renderer as XYLineAndShapeRenderer)
-        (plot.renderer as XYLineAndShapeRenderer).defaultToolTipGenerator =
+        r.defaultShapesVisible = true
+        r.defaultShapesFilled = true
+
+        r.defaultToolTipGenerator =
             XYToolTipGenerator { data, series, item ->
                 val key = data.getSeriesKey(series).toString()
-                key + ":" + dateFormat.first.format(Date((data.getX(series, item) as Long))) + ", ${
-                    data.getY(
-                        series,
-                        item
-                    )
-                }"
+                val y = NumberFormat.getCurrencyInstance().format(data.getY(series, item))
+                val x = dateFormat.first.format(Date((data.getX(series, item) as Long)))
+
+                "$key: $x, $y"
             }
 
         chartPanel.chart = chart
         chartPanel.isDomainZoomable = true
         chartPanel.isRangeZoomable = true
+
+        chartPanel.initialDelay = 0
+        chartPanel.dismissDelay = Int.MAX_VALUE
+
+        chartPanel.verticalAxisTrace = true
     }
 
     private fun getDateFormat(dataset: TimeSeriesCollection): Pair<SimpleDateFormat, DateTickUnit> {

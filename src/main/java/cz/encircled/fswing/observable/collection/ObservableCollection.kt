@@ -11,4 +11,6 @@ interface ObservableCollection<T> : MutableList<T> {
 
     fun bindIncoming(other: ObservableCollection<T>)
 
+    fun <R : Comparable<R>> sorted(selector: (T) -> R?): ObservableCollection<T>
+
 }

@@ -44,7 +44,12 @@ inline fun JComponent.onHover(crossinline onEnter: () -> Unit, crossinline onLef
 inline fun JComponent.onClick(crossinline callback: (e: MouseEvent) -> Unit): JComponent {
     addMouseListener(object : MouseAdapter() {
         override fun mousePressed(e: MouseEvent) {
-            callback(e)
+            try {
+                callback(e)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                throw e;
+            }
         }
     })
     return this
@@ -84,13 +89,14 @@ inline fun <T> ObservableValue<T>.onChange(crossinline listener: (T) -> Unit): C
     }
 }
 
-inline fun inNormalThread(crossinline runnable: () -> Unit) {
-    if (SwingUtilities.isEventDispatchThread()) {
+inline fun inNormalThread(crossinline runnable: () -> Unit): CompletableFuture<Void?> {
+    return if (SwingUtilities.isEventDispatchThread()) {
         CompletableFuture.runAsync {
             runnable.invoke()
         }
     } else {
         runnable.invoke()
+        CompletableFuture.completedFuture(null)
     }
 }
 

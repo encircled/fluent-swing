@@ -51,6 +51,11 @@ open class DelegatingObservableList<T>(initial: Collection<T> = listOf()) : Obse
         addAll(other)
     }
 
+    override fun <R : Comparable<R>> sorted(selector: (T) -> R?): ObservableCollection<T> {
+        delegate.setAll(delegate.sortedBy { selector(it) })
+        return this
+    }
+
     override fun get(index: Int): T = delegate.get(index)
 
     override fun indexOf(element: T): Int = delegate.indexOf(element)

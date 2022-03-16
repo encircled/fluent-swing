@@ -16,17 +16,19 @@ class FluentList<T>(source: ObservableCollection<T> = observableList()) : JList<
 
     fun dataSource(new: ObservableCollection<T>) {
         cancelableListeners.forEach { it.cancel() }
-        data = new
+        data = new.sorted { it.toString() }
         onDataChange()
         cancelableListeners.add(data.onChange { _, _ ->
             onDataChange()
         })
     }
 
-    fun bind(to: ObservableCollection<T>) {
+    fun bind(to: ObservableCollection<T>): FluentList<T> {
         onChange {
             to.setAll(it)
         }
+
+        return this
     }
 
     fun onChange(callback: (List<T>) -> Unit): FluentList<T> {

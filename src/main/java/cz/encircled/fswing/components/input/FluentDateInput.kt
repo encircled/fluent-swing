@@ -1,6 +1,7 @@
 package cz.encircled.fswing.components.input
 
 import cz.encircled.fswing.components.RemovalAware
+import cz.encircled.fswing.x
 import javafx.beans.property.ObjectProperty
 import java.time.LocalDate
 
@@ -15,6 +16,10 @@ class FluentDateInput(
 ) : BaseInput<LocalDate>(placeholder, onChangeWaitTime), RemovalAware {
 
     private val delimiters: List<String> = listOf(" ", "-", ".")
+
+    init {
+        preferredSize = 170 x 30
+    }
 
     fun bind(to: ObjectProperty<LocalDate>): FluentDateInput {
         onChange { to.set(it) }

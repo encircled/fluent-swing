@@ -162,7 +162,18 @@ class Showcase : JFrame() {
                     JPanel().apply { background = Color.BLUE }
                 }
                 nextRow {
-                    JPanel().apply { background = Color.YELLOW }
+                    gridPanel {
+                        background = Color.MAGENTA
+                        nextColumn(100) {
+                            JPanel().apply { background = Color.YELLOW }
+                        }
+                        nextColumn {
+                            JPanel().apply { background = Color.MAGENTA }
+                        }
+                        nextColumn(50) {
+                            JPanel().apply { background = Color.BLACK }
+                        }
+                    }
                 }
             }
         }
